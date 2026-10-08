@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A contributor-friendly overview of project status, activity, and priorities.">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="dashboard-header">
+        <h1>Project Pulse</h1>
+        <p>A quick, contributor-friendly view of what each project is working on and where help is needed.</p>
+      </header>
+
+      <section aria-label="Projects" aria-busy="true" id="projects-section">
+        <p class="message" id="projects-message" role="status" aria-live="polite">Loading projects…</p>
+        <div class="project-grid" id="project-grid"></div>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const projectsSection = document.getElementById("projects-section");
+        const message = document.getElementById("projects-message");
+        const projectGrid = document.getElementById("project-grid");
+        const requiredFields = ["name", "owner", "status", "recentActivity", "priority", "summary"];
+
+        function validateProject(project, index) {
+          const hasValidFields = project && typeof project === "object" &&
+            requiredFields.every((field) =>
+              typeof project[field] === "string" && project[field].trim().length > 0
+            );
+          if (!hasValidFields) {
+            throw new Error(
+              `Project at index ${index} is malformed; expected non-empty string values for: ${requiredFields.join(", ")}.`
+            );
+          }
+          return project;
+        }
+
+        function createTextElement(tagName, className, text) {
+          const element = document.createElement(tagName);
+          if (className) {
+            element.className = className;
+          }
+          element.textContent = text;
+          return element;
+        }
+
+        function createProjectCard(project) {
+          const card = document.createElement("article");
+          card.className = "project-card";
+
+          card.append(createTextElement("h2", "", project.name));
+
+          const summary = createTextElement("p", "project-summary", project.summary);
+          card.append(summary);
+
+          const owner = createTextElement("p", "project-owner", `Owner: ${project.owner}`);
+          card.append(owner);
+
+          const metadata = document.createElement("div");
+          metadata.className = "project-meta";
+
+          const status = createTextElement("span", "status-badge", project.status);
+          status.dataset.status = project.status.trim().toLowerCase();
+          status.setAttribute("aria-label", `Status: ${project.status}`);
+
+          const priority = createTextElement("span", "priority-badge", `Priority: ${project.priority}`);
+          priority.dataset.priority = project.priority.trim().toLowerCase();
+          priority.setAttribute("aria-label", `Priority: ${project.priority}`);
+
+          metadata.append(status, priority);
+          card.append(metadata);
+
+          const activity = document.createElement("p");
+          activity.className = "project-activity";
+          const activityLabel = createTextElement("strong", "", "Recent activity: ");
+          activity.append(activityLabel, document.createTextNode(project.recentActivity));
+          card.append(activity);
+
+          return card;
+        }
+
+        function showMessage(text, state) {
+          message.textContent = text;
+          message.hidden = false;
+          message.setAttribute("role", state === "error" ? "alert" : "status");
+          if (state) {
+            message.dataset.state = state;
+          } else {
+            delete message.dataset.state;
+          }
+        }
+
+        async function loadProjects() {
+          try {
+            const response = await fetch("project-data.json", { headers: { Accept: "application/json" } });
+            if (!response.ok) {
+              throw new Error(`Project data request failed with status ${response.status}.`);
+            }
+
+            const data = await response.json();
+            if (!data || !Array.isArray(data.projects)) {
+              throw new Error("Project data must contain a projects array.");
+            }
+
+            const projects = data.projects.map(validateProject);
+            projectsSection.setAttribute("aria-busy", "false");
+            if (projects.length === 0) {
+              showMessage("There are no project updates to show yet.", "empty");
+              return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            projects.forEach((project) => fragment.append(createProjectCard(project)));
+            projectGrid.append(fragment);
+            message.hidden = true;
+          } catch (error) {
+            console.error("Failed to load projects:", error);
+            projectsSection.setAttribute("aria-busy", "false");
+            showMessage("Projects could not be loaded. Please check that the dashboard is being served over HTTP and try again.", "error");
+          }
+        }
+
+        loadProjects();
+      })();
+    </script>
+  </body>
+</html>

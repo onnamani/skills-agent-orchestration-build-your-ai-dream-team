@@ -1,0 +1,36 @@
+{
+  "projects": [
+    {
+      "name": "Community Docs Refresh",
+      "owner": "Mona Patel",
+      "status": "Active",
+      "recentActivity": "Contributor guide updated and ready for review.",
+      "priority": "High",
+      "summary": "Clarifies the getting-started path so new contributors can find a first task and make their first change with confidence."
+    },
+    {
+      "name": "Accessibility Audit",
+      "owner": "Jordan Lee",
+      "status": "At Risk",
+      "recentActivity": "Keyboard-navigation findings collected; fixes are awaiting review.",
+      "priority": "High",
+      "summary": "Tracks practical accessibility improvements across the dashboard and its supporting documentation. Help reviewing keyboard and screen-reader behavior is welcome."
+    },
+    {
+      "name": "Release Notes Automation",
+      "owner": "Avery Chen",
+      "status": "Planned",
+      "recentActivity": "The first automation workflow has been scoped for the next iteration.",
+      "priority": "Medium",
+      "summary": "Makes release notes easier to assemble from merged work. Contributors can help refine the proposed workflow and identify useful release metadata."
+    },
+    {
+      "name": "API Migration Guide",
+      "owner": "Sam Rivera",
+      "status": "Completed",
+      "recentActivity": "Migration examples and verification checklist published this week.",
+      "priority": "Low",
+      "summary": "Provides a step-by-step route for moving existing integrations to the current API, with examples that maintainers can update as the interface evolves."
+    }
+  ]
+}
